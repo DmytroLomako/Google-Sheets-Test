@@ -1,4 +1,4 @@
-import os.path
+import os.path, pandas
 
 from google.auth.transport.requests import Request
 from google.oauth2.credentials import Credentials
@@ -43,13 +43,22 @@ def write(service, value, range):
     value = {'values': value}
     result = sheet.values().update(spreadsheetId=SAMPLE_SPREADSHEET_ID, range=range, valueInputOption='RAW', body=value).execute()
 
+def download(value):
+    data = pandas.DataFrame(value[1:], columns = value[0])
+    path = os.path.abspath(__file__ + '/../files')
+    data.to_csv(path + '/data.csv', index = False)
+    data.to_excel(path + '/data.xlsx', index = False)
+    data.to_html(path + '/data.html', index = False)
+    print(data)
+    # data.to_json(path + '/data.json', index = False)
 
 if __name__ == "__main__":
   service = connection()
-  value = read(service, 'sheet!A1:C2')
-  result = 0
-  for i in value:
-      for num in i:
-        result += int(num)
-      write(service, [[result]], f'sheet!D{value.index(i) + 1}')
-      result = 0
+  value = read(service, 'sheet')
+  download(value)
+  # result = 0
+  # for i in value:
+  #     for num in i:
+  #       result += int(num)
+  #     write(service, [[result]], f'sheet!D{value.index(i) + 1}')
+  #     result = 0
